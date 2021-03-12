@@ -1,0 +1,72 @@
+server:
+  port: 8080
+spring:
+  main:
+    banner-mode: "off"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/poc
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        default_schema: poc
+        ddl-auto: validate
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  flyway:
+    enabled: true
+    baselineOnMigrate: false
+    schemas: poc
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache.xml
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          zkNodes: localhost:2181
+          producerProperties:
+            retries: 3
+            max:
+              in:
+                flight:
+                  requests:
+                    per:
+                      connection: 1
+            retry:
+              backoff:
+                ms: 1000
+            request:
+              timeout:
+                ms: 10000
+      bindings:
+        poc:
+          consumer:
+            autoCommitOffset: false
+            autoCommitOnError: false
+        alert:
+          destination: alert
+      default-binder: kafka
+togglz:
+  enabled: true
+  features:
+    RETRY_TEST_ENABLE:
+      enabled: true
+    MOCK_ENABLE:
+      enabled: true
+
+swagger:
+  title: POC
+  description:
+  license:
+  basePackage: com.poc.spring.docker
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
